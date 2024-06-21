@@ -2059,6 +2059,7 @@ foreach ($articleFound in $UpdateArticles) {
 	$NewContent = Update-StringWithCaptureGroups -inputString $NewContent -pattern $RichDocLocatorUrlPatternToMatch -type "rich"
  	$NewContent = Update-StringWithCaptureGroups -inputString $NewContent -pattern $RichDocLocatorRelativeURLPatternToMatch -type "rich"
         Write-Host "Updating Article $($articleFound.name) with replaced Content" -ForegroundColor 'Green'
+        Start-Sleep -Milliseconds 100
 	try {
         $ArticlePost = Set-HuduArticle -Name $articleFound.name -id $articleFound.id -Content $NewContent -ErrorAction Stop
         $articlesUpdated = $articlesUpdated + @{"status" = "replaced"; "original_article" = $articleFound; "updated_article" = $ArticlePost}
@@ -2083,6 +2084,7 @@ foreach ($assetFound in $UpdateAssets.HuduObject) {
         $NewContent = Update-StringWithCaptureGroups -inputString $NewContent -pattern $RichRegexPatternToMatchWithAssets -type "rich"
         if ($NewContent) {
             Write-Host "Replacing Asset $($assetFound.name) field $($field.caption) with replaced Content" -ForegroundColor 'Red'
+            Start-Sleep -Milliseconds 100
             ($assetFound.fields | Where-Object {$_.id -eq $field.id}).value = $NewContent
             $replacedStatus = 'replaced'
         }
@@ -2090,6 +2092,7 @@ foreach ($assetFound in $UpdateAssets.HuduObject) {
     if ($replacedStatus -ne 'replaced') {$replacedStatus = 'clean'}
     else {
         Write-Host "Updating Asset $($assetFound.name) with replaced field values" -ForegroundColor 'Green'
+        Start-Sleep -Milliseconds 100
         $AssetPost = Set-HuduAsset -asset_layout_id $assetFound.asset_layout_id -Name $assetFound.name -AssetId $assetFound.id -CompanyId $assetFound.company_id -Fields $assetFound.fields
     }
     $assetsUpdated = $assetsUpdated + @{"status" = $replacedStatus; "original_asset" = $originalAsset; "updated_asset" = $AssetPost.asset}
@@ -2102,10 +2105,12 @@ Read-Host "Snapshot Point: Assets URLs Replaced. Continue?"
 # Passwords
 $passwordsUpdated = @()
 foreach ($passwordFound in $UpdatePasswords.HuduObject) {
-    $NewContent = Update-StringWithCaptureGroups -inputString $passwordFound.description -pattern $TextRegexPatternToMatchSansAssets -type "plain"
+    $NewContent = Update-StringWithCaptureGroups -inputString $passwordFound.descripti
+    on -pattern $TextRegexPatternToMatchSansAssets -type "plain"
     $NewContent = Update-StringWithCaptureGroups -inputString $NewContent -pattern $TextRegexPatternToMatchWithAssets -type "plain"
     if ($NewContent) {
         Write-Host "Updating Password $($passwordFound.name) with updated description" -ForegroundColor 'Green'
+        Start-Sleep -Milliseconds 100
         $passwordsUpdated = $passwordsUpdated + @{"original_password" = $passwordFound; "updated_password" = (Set-HuduPassword -id $passwordFound.id -Description $NewContent).asset_password}
     }
 }
@@ -2120,6 +2125,7 @@ foreach ($passwordFound in $UpdateAssetPasswords) {
     $NewContent = Update-StringWithCaptureGroups -inputString $NewContent -pattern $TextRegexPatternToMatchWithAssets -type "plain"
     if ($NewContent)   {
         Write-Host "Updating Asset Password $($passwordFound.name) with updated description" -ForegroundColor 'Green'
+        Start-Sleep -Milliseconds 100
         $assetPasswordsUpdated = $assetPasswordsUpdated + @{"original_password" = $passwordFound; "updated_password" = (Set-HuduPassword -Id $passwordFound.id -Description $NewContent).asset_password}
     }
     
@@ -2134,6 +2140,7 @@ foreach ($companyFound in $UpdateCompanyNotes.HuduCompanyObject) {
     $NewContent = Update-StringWithCaptureGroups -inputString $NewContent -pattern $RichRegexPatternToMatchWithAssets -type "rich"
     if ($NewContent) {
         Write-Host "Updating Company $($companyFound.name) with updated notes" -ForegroundColor 'Green'
+        Start-Sleep -Milliseconds 100
         $companyNotesUpdated = $companyNotesUpdated + @{"original_company" = $companyFound; "updated_company" = (Set-HuduCompany -id $companyFound.id -Notes $NewContent).company}
     }
 
